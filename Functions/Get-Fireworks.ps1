@@ -44,7 +44,7 @@ Function Get-Fireworks {
     Clear-Host
 
     #Initializing paths.
-    $VersionPath = (Get-Module "AToolbox").ModuleBase
+    $VersionPath = (Get-Module "PowershellAnimations").ModuleBase
     $FireworksPath = $VersionPath + '\media\FireworksASCIIAnimationFormatted.txt'
     $FireworksSoundPath = $VersionPath + '\media\smbfireworks.wav'
     If ($Null -eq $VersionPath) {

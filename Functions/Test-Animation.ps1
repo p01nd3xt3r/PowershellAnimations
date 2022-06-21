@@ -24,7 +24,7 @@ Function Test-Animation {
     )
 
     [console]::CursorVisible = $False
-    $VersionPath = (Get-Module "AToolbox").ModuleBase
+    $VersionPath = (Get-Module "PowershellAnimations").ModuleBase
     $SMBOWSoundPath = $VersionPath + '\media\SMBOverworld.wav'
     If ($Null -eq $VersionPath) {
         Throw "You don't seem to be running this function from the AToolbox module. It's only designed for that context."

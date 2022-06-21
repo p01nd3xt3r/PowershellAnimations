@@ -42,7 +42,7 @@ Function Start-PlumberTimer {
     }
 
     #General content
-    $VersionPath = (Get-Module "AToolbox").ModuleBase
+    $VersionPath = (Get-Module "PowershellAnimations").ModuleBase
     If ($Null -eq $VersionPath) {
         Throw "You don't seem to be running this function from the AToolbox module. It's only designed for that context."
     }
