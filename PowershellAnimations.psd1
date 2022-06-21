@@ -71,22 +71,24 @@ Copyright = '(c) Patrick D. Pace. All rights reserved.'
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 NestedModules = @(
-    '.\functions\Test-Animation.ps1',
     '.\functions\Get-Fireworks.ps1',
+    '.\Functions\Start-Fiesta.ps1',
+    '.\functions\Start-Pacing.ps1',
     '.\functions\Start-PlumberTimer.ps1',
-    '.\functions\Start-Timer.ps1',
     '.\functions\Start-Reminder.ps1',
-    '.\functions\Start-Pacing.ps1'
+    '.\functions\Start-Timer.ps1',
+    '.\functions\Test-Animation.ps1'
 )
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
-    "Test-Animation",
     "Get-Fireworks",
+    "Start-Fiesta",
+    "Start-Pacing",
     "Start-PlumberTimer",
-    "Start-Timer",
     "Start-Reminder",
-    "Start-Pacing"
+    "Start-Timer",
+    "Test-Animation"
 )
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
@@ -106,16 +108,16 @@ AliasesToExport = @()
 
 # List of all files packaged with this module
 FileList = @(
-    ".\Media\FireworksASCIIAnimationFormatted.txt",
-    ".\Media\SMBFireworks.wav",
-    ".\Media\SMBOverworld.wav",
-    ".\Media\SMBFanfare.wav",
-    ".\Media\SMBHurryUp.wav",
-    ".\Media\SMBOverworldRapid.wav",
     ".\Media\ASCII-ClockDigits.txt",
+    ".\Media\ASCII-Mario-Fireworks-Inverse.txt",
     ".\Media\ASCII-Mario-Inverse.txt",
     ".\Media\ASCII-V-Inverse.txt",
-    ".\Media\ASCII-Mario-Fireworks-Inverse.txt"
+    ".\Media\FireworksASCIIAnimationFormatted.txt",
+    ".\Media\SMBFanfare.wav",
+    ".\Media\SMBFireworks.wav",
+    ".\Media\SMBHurryUp.wav",
+    ".\Media\SMBOverworld.wav",
+    ".\Media\SMBOverworldRapid.wav"
 )
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
