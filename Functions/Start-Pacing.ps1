@@ -14,7 +14,7 @@
 #>
 Function Start-Pacing {
     param (
-        [Parameter()][string]$Type = "Single",
+        [Parameter()][string]$Type = "Multi",
         [Parameter()][string]$Precipication = "Rain",
         [Parameter()][int]$Speed = 1,
         [Parameter()][int]$Rain = 3
