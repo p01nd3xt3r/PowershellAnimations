@@ -15,7 +15,7 @@
 Function Start-Pacing {
     param (
         [Parameter()][string]$Type = "Multi",
-        [Parameter()][string]$Precipication = "Rain",
+        [Parameter()][string]$Precipitation = "Rain",
         [Parameter()][int]$Speed = 1,
         [Parameter()][int]$Rain = 3
     )
@@ -142,12 +142,12 @@ Function Start-Pacing {
     If ($Type -eq "Multi") {
         # When using width in relation to indexes in the map, remember that the width starts with 1 and the indexes start with 0
         
-        If ($Precipication -eq "snow") {
+        If ($Precipitation -eq "snow") {
             $PacingRainColor = "`e[48;5;0m`e[97m"
             $PacingGuyColor = "`e[48;5;0m`e[37m"
             $PacingBackgroundColor = "`e[48;5;0m`e[37m"
             $PacingSlopeColor = "`e[48;5;0m`e[90m"
-        } ElseIf ($Precipication -eq "rain") {
+        } ElseIf ($Precipitation -eq "rain") {
             $PacingRainColor = "`e[48;5;0m`e[38;5;20m"
             $PacingGuyColor = "`e[48;5;0m`e[38;5;25m"
             $PacingBackgroundColor = "`e[48;5;0m`e[32m" # "`e[48;5;0m`e[38;5;65m"
