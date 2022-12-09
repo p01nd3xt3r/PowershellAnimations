@@ -77,6 +77,7 @@ NestedModules = @(
     '.\functions\Start-PlumberTimer.ps1',
     '.\functions\Start-Reminder.ps1',
     '.\functions\Start-Timer.ps1',
+    '.\functions\Start-Wandering.ps1',
     '.\functions\Test-Animation.ps1'
 )
 
@@ -88,6 +89,7 @@ FunctionsToExport = @(
     "Start-PlumberTimer",
     "Start-Reminder",
     "Start-Timer",
+    "Start-Wandering",
     "Test-Animation"
 )
 
