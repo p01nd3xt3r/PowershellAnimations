@@ -142,5 +142,75 @@ Function Start-Wandering {
             $WanderingOutputString = $WanderingOutputFiller, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String
             $WanderingOutputString
         }
+    } ElseIf ($Type -eq "RandomLaser") {
+        $WanderingLaserLocation = 0
+        $WanderingLaserDirection = "right"
+        $WanderingLaserRight = "\"
+        $WanderingLaserLeft = "/"
+        $WanderingLaser = $WanderingLaserRight
+        $WanderingLaserCurrentColor = $WanderingWandererColors | Get-Random
+        $WanderingWanderer = "●"
+
+        #Main loop
+        While ($True) {
+            #Moving the laser, turning him when he hits the end.
+            If ($WanderingLaserDirection -eq "right") {
+                If ($WanderingLaserLocation -eq ($WanderingMaxWidth + 1)) {
+                    $WanderingLaserDirection = "left"
+                    $WanderingLaser = $WanderingLaserLeft
+                    $WanderingLaserCurrentColor = $WanderingWandererColors | Get-Random
+                } Else {
+                    $WanderingLaserLocation++
+                }
+            } Else {
+                If ($WanderingLaserLocation -eq 0) {
+                    $WanderingLaserDirection = "right"
+                    $WanderingLaser = $WanderingLaserRight
+                    $WanderingLaserCurrentColor = $WanderingWandererColors | Get-Random
+                } Else {
+                    $WanderingLaserLocation--
+                }
+            }
+
+            #Making the random one's location and color. Excludes laser location.
+            Do {
+                $WanderingWandererLocation = (0..$WanderingMaxWidth) | Get-Random
+            } Until ($WanderingWandererLocation -ne $WanderingLaserLocation)
+            $WanderingWandererCurrentColor = $WanderingWandererColors | Get-Random
+
+            #####
+            $WanderingOutputFillerLeft = ""
+            $WanderingOutputFillerCenter = ""
+            If ($WanderingLaserLocation -lt $WanderingWandererLocation) {
+                #Left filler
+                For ($I = 0; $I -lt $WanderingLaserLocation; $I++) {
+                    $WanderingOutputFillerLeft += " "
+                }
+                #Center filler
+                For ($I = 0; $I -lt ($WanderingWandererLocation - $WanderingLaserLocation - 1); $I++) {
+                    $WanderingOutputFillerCenter += " "
+                }
+                #Building output string
+                $WanderingOutputString = $WanderingOutputFillerLeft, "`e[38;5;", $WanderingLaserCurrentColor, "m", $WanderingLaser, "`e[0m", $WanderingOutputFillerCenter, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String
+            } Else {
+                #Left filler
+                For ($I = 0; $I -lt $WanderingWandererLocation; $I++) {
+                    $WanderingOutputFillerLeft += " "
+                }
+                #Center filler
+                For ($I = 0; $I -lt ($WanderingLaserLocation - $WanderingWandererLocation - 1); $I++) {
+                    $WanderingOutputFillerCenter += " "
+                }
+                #Building output string
+                $WanderingOutputString = $WanderingOutputFillerLeft, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m", $WanderingOutputFillerCenter, "`e[38;5;", $WanderingLaserCurrentColor, "m", $WanderingLaser, "`e[0m" | Join-String
+            }
+
+            $WanderingOutputString
+        }
+    } ElseIf ($Type -eq "Argyle") {
+        #Multi laser that decreases in width until it's a line and then increases back to max size and so on.
+    } Else {
+        Write-Host "Sorry, you've entered an invalid type."
+        Return
     }
 }

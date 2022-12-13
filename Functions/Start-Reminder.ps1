@@ -46,7 +46,7 @@ Function Start-Reminder {
                 $ReminderPercent = ($I/$ReminderSeconds*100)
             }
 
-            Write-Progress -activity "Reminder #$RemindersSoFar in" -status $ReminderStatus -PercentComplete $ReminderPercent
+            Write-Progress -Activity "Reminder #$RemindersSoFar in" -Status $ReminderStatus -PercentComplete $ReminderPercent
             Start-Sleep -seconds 1
         }
         $ReminderSoundPlayer.play()
