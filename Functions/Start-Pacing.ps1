@@ -1,8 +1,7 @@
 <#
 .Synopsis
 .Description
-.Parameter Copy
-.Parameter Path
+.Parameter Text
 .Example 
 .Inputs
 .Outputs

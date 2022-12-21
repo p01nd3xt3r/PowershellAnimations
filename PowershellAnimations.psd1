@@ -73,6 +73,7 @@ Copyright = '(c) Patrick D. Pace. All rights reserved.'
 NestedModules = @(
     '.\functions\Get-Fireworks.ps1',
     '.\Functions\Start-Fiesta.ps1',
+    '.\Functions\Start-Labyrinth.ps1',
     '.\functions\Start-Pacing.ps1',
     '.\functions\Start-PlumberTimer.ps1',
     '.\functions\Start-Reminder.ps1',
@@ -85,6 +86,7 @@ NestedModules = @(
 FunctionsToExport = @(
     "Get-Fireworks",
     "Start-Fiesta",
+    "Start-Labyrinth",
     "Start-Pacing",
     "Start-PlumberTimer",
     "Start-Reminder",
