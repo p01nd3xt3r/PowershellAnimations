@@ -266,8 +266,8 @@ Function Start-Labyrinth {
         Function BuildOutput {
             #Building a hashtable of just the cells around the user character.
             $LabOutputHashtable = [ordered]@{}
-            $LabOutputRangeX = @{"Min" = $LabMap2UserCoords.x - 10; "Max" = $LabMap2UserCoords.x + 10}
-            $LabOutputRangeY = @{"Min" = $LabMap2UserCoords.y - 20; "Max" = $LabMap2UserCoords.y + 20}
+            $LabOutputRangeX = @{"Min" = $LabMap2UserCoords.x - 8; "Max" = $LabMap2UserCoords.x + 8}
+            $LabOutputRangeY = @{"Min" = $LabMap2UserCoords.y - 8; "Max" = $LabMap2UserCoords.y + 8}
             
             For ($RowI = $LabOutputRangeY.min; $RowI -le $LabOutputRangeY.max; $RowI++) {
                 $LabOutputHashtableColumns = [ordered]@{}
@@ -291,6 +291,7 @@ Function Start-Labyrinth {
             $LabOutputString = $LabOutputHashtable.keys | Foreach-Object {$LabOutputHashtable.$_.values | Join-String}
 
             #Outputting
+            Clear-Host
             $LabOutputString
         }
         #Displaying initial screen
@@ -322,16 +323,15 @@ Function Start-Labyrinth {
                         $LabMap2UserCoords.y = $LabMap2UserCoords.y - 1
                     }
                 } ElseIf ($Key.key -eq "LeftArrow") {
-                    If ($LabMap2WorkingHash[($LabMap2UserCoords.y)][($LabMap2UserCoords.x - 2)] -eq " ") {
-                        $LabMap2UserCoords.x = $LabMap2UserCoords.x - 2
+                    If ($LabMap2WorkingHash[($LabMap2UserCoords.y)][($LabMap2UserCoords.x - 1)] -eq " ") {
+                        $LabMap2UserCoords.x = $LabMap2UserCoords.x - 1
                     }
                 } ElseIf ($Key.key -eq "RightArrow") {
-                    If ($LabMap2WorkingHash[($LabMap2UserCoords.y)][($LabMap2UserCoords.x + 2)] -eq " ") {
-                        $LabMap2UserCoords.x = $LabMap2UserCoords.x + 2
+                    If ($LabMap2WorkingHash[($LabMap2UserCoords.y)][($LabMap2UserCoords.x + 1)] -eq " ") {
+                        $LabMap2UserCoords.x = $LabMap2UserCoords.x + 1
                     }
                 }
                 
-                Clear-Host
                 $LabMap2WorkingHash[$LabMap2UserCoords.y][$LabMap2UserCoords.x] = $LabUserCharacter
                 BuildOutput
             }
