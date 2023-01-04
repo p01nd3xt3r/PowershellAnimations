@@ -65,7 +65,7 @@ Function Get-Nav {
             "`n    Directory: " + $LabDirHashCurrentLocation + "`n"
             "`nThe current directory is either empty or otherwise unreadable.`n"
         }
-        "↑↓ Navigate list  ← Back to parent folder  → Enter selected folder`nSPACE End the function at the current location`n"
+        "↑↓ Navigate list `n← Back to parent folder  → Enter selected folder`nSPACE End the function at the current location`nENTER Open the selected file or folder with its app`n"
     }
     
     $LabDirUserLocation = 1
