@@ -14,63 +14,114 @@
 
 Function Get-Nav {
     # Navigating directories by a simple up/down marker and hitting left or right to go to them. Hitting enter on a file opens it with the default program. Space changes the PS session's location to the function's current location.
+
+    # Note that PS7 has colorized results for get-childitem. It probably uses $psstyle and ascii escapes. To make this compatible with ps5, though, I'm withholding coloring.
     
-    $LabUserCharacter = "●"
+    $NavUserCharacter = "●"
     
     Function BuildLocationHash {
         param (
             [Parameter()][String]$Path
         )
         #Building hash.
-        $LabDirLocationItems = Get-ChildItem $Path
-        $LabDirHash = [ordered]@{}
-        For ($LabDirI = 0; $LabDirI -lt $LabDirLocationItems.count; $LabDirI++) {
-            $LabDirHash.add($LabDirI,$LabDirLocationItems[$LabDirI])
+        $NavLocationItems = Get-ChildItem $Path
+        $NavHash = [ordered]@{}
+        For ($NavI = 0; $NavI -lt $NavLocationItems.count; $NavI++) {
+            $NavHash.add($NavI,$NavLocationItems[$NavI])
         }
-        Return $LabDirHash
+        Return $NavHash
+    }
+
+    # Getting content size.
+    $NavHeaderPlusLocationRowCount = 6
+    $NavHeader = (Prompt).tostring() + "`n"
+    $NavFooterRowCount = 6
+    $NavFooter = "↑↓ Navigate list `n← Back to parent folder  → Enter selected folder`nSPACE End the function at the current location`nENTER Open the selected file or folder with its app`n"
+    $NavContentTopRow = $NavHeaderPlusLocationRowCount
+    $NavContentMaxBottomRow = ((Get-Host).ui.rawui.windowsize.height) - $NavFooterRowCount - 2
+    If (($NavContentMaxBottomRow - $NavContentTopRow) -lt 3) {
+        $NavContentMaxBottomRow = $NavContentTopRow + 3
+    }
+    $NavContentSpread = $NavContentMaxBottomRow - $NavContentTopRow
+    
+    #Initiating hash, so it's accessible outside the following function. Is that necessary?
+    $NavContentKeysHash = @{
+        Top = 0
+        BottomMax = 0
+    }
+    
+    Function BuildKeyAnchors {
+        param (
+            [Parameter()][int]$Top = 0,
+            [Parameter()][int]$BottomMax = $Top + $NavContentSpread
+        )
+
+        $NavContentKeysHash["Top"] = $Top
+        
+        # If there are less results than the max allowed bottom row, set the bottom row to the bottom result.
+        If (($NavHash.count - 1) -le $BottomMax) {
+            $NavContentKeysHash["BottomMax"] = $NavHash.count - 1
+        } Else {
+            $NavContentKeysHash["BottomMax"] = $BottomMax
+        }
     }
 
     Function BuildOutput {
         #Hashtable of objects with properties of Item, Type, and Selection, with the Selection having the user character if it's where the user has it.
-        $LabDirOutputArray = @()
-        For ($LabDirHashI = 0; $LabDirHashI -lt $LabDirHash.count; $LabDirHashI++) {
-            If (($LabDirHash[$LabDirHashI]).mode -notlike "d*") {
-                $LabDirHashILength = ($LabDirHash[$LabDirHashI]).length
-            } Else {
-                $LabDirHashILength = " "
-            }
-            If (($LabDirHashI + 1) -eq $LabDirUserLocation) {
-                $LabDirHashISelection = $LabUserCharacter
-            } Else {
-                $LabDirHashISelection = " "
-            }
-            $LabDirHashObjectProperties = [ordered]@{
-                $LabUserCharacter = $LabDirHashISelection
-                Mode = ($LabDirHash[$LabDirHashI]).mode
-                LastWriteTime = ($LabDirHash[$LabDirHashI]).lastwritetime
-                Length = $LabDirHashILength
-                Name = ($LabDirHash[$LabDirHashI]).name
-            }
-            $LabDirOutputArray += New-Object -typename psobject -property $LabDirHashObjectProperties
+
+        $NavOutputHash = [ordered]@{}
+
+        If (($NavContentKeysHash["Top"] -gt 0) -and ($NavContentKeysHash["BottomMax"] -lt ($NavHash.count - 1))) {
+            $NavSelectorColumnHeader = "↕"
+        } ElseIf ($NavContentKeysHash["Top"] -gt 0) {
+            $NavSelectorColumnHeader = "↑"
+        } ElseIf ($NavContentKeysHash["BottomMax"] -lt ($NavHash.count - 1)) {
+            $NavSelectorColumnHeader = "↓"
+        } Else {
+            $NavSelectorColumnHeader = $NavUserCharacter
         }
 
-        Clear-Host
-        Start-Sleep -Milliseconds 5
-        If ($LabDirOutputArray.count -gt 0) {
-            Prompt
-            "`n    Directory: " + $LabDirHashCurrentLocation + "`n"
-            $LabDirOutputArray | Format-Table
-        } Else {
-            Prompt
-            "`n    Directory: " + $LabDirHashCurrentLocation + "`n"
-            "`nThe current directory is either empty or otherwise unreadable.`n"
+        For ($NavHashI = $NavContentKeysHash["Top"]; $NavHashI -le $NavContentKeysHash["BottomMax"]; $NavHashI++) {
+            
+            If (($NavHash[$NavHashI]).mode -notlike "d*") {
+                $NavHashILength = ($NavHash[$NavHashI]).length
+            } Else {
+                $NavHashILength = " "
+            }
+
+            If ($NavHashI -eq $NavUserLocation) {
+                $NavHashISelection = $NavUserCharacter
+            } Else {
+                $NavHashISelection = " "
+            }
+
+            $NavHashObjectProperties = [ordered]@{
+                $NavSelectorColumnHeader = $NavHashISelection
+                Mode = ($NavHash[$NavHashI]).mode
+                LastWriteTime = ($NavHash[$NavHashI]).lastwritetime
+                Length = $NavHashILength
+                Name = ($NavHash[$NavHashI]).name
+            }
+
+            $NavOutputHash.add($NavHashI,(New-Object -typename psobject -property $NavHashObjectProperties))
         }
-        "↑↓ Navigate list `n← Back to parent folder  → Enter selected folder`nSPACE End the function at the current location`nENTER Open the selected file or folder with its app`n"
+
+        If ($NavOutputHash.count -gt 0) {
+            $NavOutputContents = $NavOutputHash.keys | Foreach-Object {$NavOutputHash.$_} | Format-Table
+        } Else {
+            $NavOutputContents = "`nThis directory is empty or otherwise unreadable.`n"
+        }
+
+        $NavOutputArray = @($NavHeader, ("    Directory: " + $NavHashCurrentLocation + "   Item Count: " + $NavHash.count), $NavOutputContents, $NavFooter)
+
+        Clear-Host
+        $NavOutputArray
     }
     
-    $LabDirUserLocation = 1
-    $LabDirHashCurrentLocation = Get-Item (Get-Location)
-    $LabDirHash = BuildLocationHash -path $LabDirHashCurrentLocation
+    $NavUserLocation = 0
+    $NavHashCurrentLocation = Get-Item (Get-Location)
+    $NavHash = BuildLocationHash -path $NavHashCurrentLocation
+    BuildKeyAnchors
     BuildOutput
 
     #Create while loop that does everything within the keypress logic.
@@ -87,48 +138,55 @@ Function Get-Nav {
                 [console]::CursorVisible = $True
                 Clear-Host
                 Return
-            } ElseIf (($Key.key -eq "DownArrow") -and ($LabDirUserLocation -lt $LabDirHash.count)) {
-                $LabDirUserLocation++
-                $LabDirHash = BuildLocationHash -path $LabDirHashCurrentLocation
+            } ElseIf (($Key.key -eq "DownArrow") -and ($NavUserLocation -lt ($NavHash.count - 1))) {
+                $NavUserLocation++
+                If ($NavUserLocation -gt $NavContentKeysHash["BottomMax"]) {
+                    BuildKeyAnchors -top ($NavContentKeysHash["Top"] + 1)
+                }
                 BuildOutput
-            } ElseIf (($Key.key -eq "UpArrow") -and ($LabDirUserLocation -gt 1)) {
-                $LabDirUserLocation--
-                $LabDirHash = BuildLocationHash -path $LabDirHashCurrentLocation
+            } ElseIf (($Key.key -eq "UpArrow") -and ($NavUserLocation -gt 0)) {
+                $NavUserLocation--
+                If ($NavUserLocation -lt $NavContentKeysHash["Top"]) {
+                    BuildKeyAnchors -top ($NavContentKeysHash["Top"] - 1)
+                }
                 BuildOutput
             } ElseIf ($Key.key -eq "LeftArrow") {
                 # Go up a directory.
-                If ($Null -ne $LabDirHashCurrentLocation.parent) {
-                    $LabDirUserLocation = 1
-                    $LabDirHashCurrentLocation = $LabDirHashCurrentLocation.parent
-                    $LabDirHash = BuildLocationHash -path $LabDirHashCurrentLocation
+                If ($Null -ne $NavHashCurrentLocation.parent) {
+                    $NavUserLocation = 0
+                    $NavHashCurrentLocation = $NavHashCurrentLocation.parent
+                    $NavHash = BuildLocationHash -path $NavHashCurrentLocation
+                    BuildKeyAnchors
                     BuildOutput
                 }
             } ElseIf ($Key.key -eq "RightArrow") {
                 # Go down a directory.
-                $LabDirHashResolvedSelection = $LabDirHash[($LabDirUserLocation - 1)]
-                If ($LabDirHashResolvedSelection.mode -like "d*") {
-                    $LabDirUserLocation = 1
-                    $LabDirHashCurrentLocation = Get-Item ($LabDirHashResolvedSelection.fullname)
-                    $LabDirHash = BuildLocationHash -path $LabDirHashCurrentLocation
+                $NavHashResolvedSelection = $NavHash[($NavUserLocation)]
+                If (($NavHashResolvedSelection.mode -like "d*") -or ($NavHashResolvedSelection.mode -like "l*")) {
+                    $NavUserLocation = 0
+                    $NavHashCurrentLocation = Get-Item ($NavHashResolvedSelection.fullname)
+                    $NavHash = BuildLocationHash -path $NavHashCurrentLocation
+                    BuildKeyAnchors
                     BuildOutput
                 }
             } ElseIf ($Key.key -eq "Enter") {
                 #If a file, opens the file with the default program. If a directory, opens the directory in Explorer.
-                $LabDirHashResolvedSelection = $LabDirHash[($LabDirUserLocation - 1)]
-                If ($LabDirHashResolvedSelection.mode -like "d*") {
-                    Start-Process $LabDirHashResolvedSelection
-                } ElseIf ($Null -ne $LabDirHashResolvedSelection.fullname) {
-                    &($LabDirHashResolvedSelection.fullname)
+                $NavHashResolvedSelection = $NavHash[($NavUserLocation)]
+                If ($NavHashResolvedSelection.mode -like "d*") {
+                    Start-Process $NavHashResolvedSelection
+                } ElseIf ($Null -ne $NavHashResolvedSelection.fullname) {
+                    &($NavHashResolvedSelection.fullname)
                 }
             } ElseIf ($Key.key -eq "Space") {
                 # Do a cd into the current directory and end this function.
-                Set-Location $LabDirHashCurrentLocation
+                Set-Location $NavHashCurrentLocation
                 Return
             } 
             # ElseIf ($Key.key -eq ":") {
             #     # Change volumes.
                 
             # }
+            # Sort options?
         }
     }
 }
