@@ -18,6 +18,7 @@ Function Get-Nav {
     # Note that PS7 has colorized results for get-childitem. It probably uses $psstyle and ascii escapes. To make this compatible with ps5, though, I'm withholding coloring.
     
     $NavUserCharacter = "●"
+    $NavMountedDrivesArray = (Get-PSDrive -psprovider filesystem).name
     
     Function BuildLocationHash {
         param (
@@ -35,8 +36,8 @@ Function Get-Nav {
     # Getting content size.
     $NavHeaderPlusLocationRowCount = 6
     $NavHeader = (Prompt).tostring() + "`n"
-    $NavFooterRowCount = 6
-    $NavFooter = "↑↓ Navigate list `n← Back to parent folder  → Enter selected folder`nSPACE End the function at the current location`nENTER Open the selected file or folder with its app`n"
+    $NavFooterRowCount = 5
+    $NavFooter = "↑↓ Navigate list   ← Back to parent folder   → Enter selected folder`nSPACE End the function at the current location   ENTER Open the selected file or folder`nChange volume with its drive letter`n"
     $NavContentTopRow = $NavHeaderPlusLocationRowCount
     $NavContentMaxBottomRow = ((Get-Host).ui.rawui.windowsize.height) - $NavFooterRowCount - 2
     If (($NavContentMaxBottomRow - $NavContentTopRow) -lt 3) {
@@ -107,7 +108,7 @@ Function Get-Nav {
         }
 
         If ($NavOutputHash.count -gt 0) {
-            $NavOutputContents = $NavOutputHash.keys | Foreach-Object {$NavOutputHash.$_} | Format-Table
+            $NavOutputContents = $NavOutputHash.values | Format-Table
         } Else {
             $NavOutputContents = "`nThis directory is empty or otherwise unreadable.`n"
         }
@@ -181,11 +182,16 @@ Function Get-Nav {
                 # Do a cd into the current directory and end this function.
                 Set-Location $NavHashCurrentLocation
                 Return
-            } 
-            # ElseIf ($Key.key -eq ":") {
-            #     # Change volumes.
-                
-            # }
+            } ElseIf ($Key.key -in $NavMountedDrivesArray) {
+                # Change volumes. Only works for single-letter drives.
+                $NavDrive = $Key.key, ":" | Join-String
+                $NavUserLocation = 0
+                $NavHashCurrentLocation = $NavDrive
+                $NavHash = BuildLocationHash -path $NavHashCurrentLocation
+                BuildKeyAnchors
+                BuildOutput
+            }
+            
             # Sort options?
         }
     }
