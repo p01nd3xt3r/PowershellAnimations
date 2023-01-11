@@ -14,7 +14,10 @@
 
 Function Get-Nav {
     # Navigating directories by a simple up/down marker and hitting left or right to go to them. Hitting enter on a file opens it with the default program. Space changes the PS session's location to the function's current location.
-
+    [CmdletBinding()]
+    param (
+        [Parameter()][Switch]$Force
+    )
     # Note that PS7 has colorized results for get-childitem. It probably uses $psstyle and ascii escapes. To make this compatible with ps5, though, I'm withholding coloring.
     
     $NavUserCharacter = "●"
@@ -25,7 +28,11 @@ Function Get-Nav {
             [Parameter()][String]$Path
         )
         #Building hash.
-        $NavLocationItems = Get-ChildItem $Path
+        If ($False -eq $Force) {
+            $NavLocationItems = Get-ChildItem $Path
+        } Else {
+            $NavLocationItems = Get-ChildItem $Path -Force
+        }
         $NavHash = [ordered]@{}
         For ($NavI = 0; $NavI -lt $NavLocationItems.count; $NavI++) {
             $NavHash.add($NavI,$NavLocationItems[$NavI])
@@ -37,7 +44,7 @@ Function Get-Nav {
     $NavHeaderPlusLocationRowCount = 6
     $NavHeader = (Prompt).tostring() + "`n"
     $NavFooterRowCount = 5
-    $NavFooter = "↑↓ Navigate list   ← Back to parent folder   → Enter selected folder`nSPACE End the function at the current location   ENTER Open the selected file or folder`nChange volume with its drive letter`n"
+    $NavFooter = "↑↓ Navigate list   ← Back to parent folder   → Enter selected folder`nSPACE End the function at the current location   ENTER Open the selected file or folder`n/ Pipe selected filepath and exit   Enter drive letter to change volume`n"
     $NavContentTopRow = $NavHeaderPlusLocationRowCount
     $NavContentMaxBottomRow = ((Get-Host).ui.rawui.windowsize.height) - $NavFooterRowCount - 2
     If (($NavContentMaxBottomRow - $NavContentTopRow) -lt 3) {
@@ -181,6 +188,15 @@ Function Get-Nav {
             } ElseIf ($Key.key -eq "Space") {
                 # Do a cd into the current directory and end this function.
                 Set-Location $NavHashCurrentLocation
+                Return
+            } ElseIf ($Key.key -eq "Oem2") {
+                # Pipe the selected item path into something.
+                Clear-Host
+                $NavHashResolvedSelection = "'" + $NavHash[($NavUserLocation)] + "'"
+                "`n    $NavHashResolvedSelection`n"
+                $NavCommand = Read-Host "Enter command to pipe this item's path into"
+                $NavCommandString = $NavHashResolvedSelection, " | ", $NavCommand | Join-String
+                Invoke-Expression $NavCommandString
                 Return
             } ElseIf ($Key.key -in $NavMountedDrivesArray) {
                 # Change volumes. Only works for single-letter drives.

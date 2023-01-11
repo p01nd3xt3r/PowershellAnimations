@@ -142,6 +142,21 @@ Function Start-Wandering {
             $WanderingOutputString = $WanderingOutputFiller, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String
             $WanderingOutputString
         }
+
+    } ElseIf ($Type -eq "Confetti") {
+        While ($True) {
+            $WanderingWanderer = "□","■","▲","►","▼","◄","○","☻","☺","●" | Get-Random
+            $WanderingWandererLocation = (0..$WanderingMaxWidth) | Get-Random
+            $WanderingWandererCurrentColor = $WanderingWandererColors | Get-Random
+
+            $WanderingOutputFiller = ""
+            For ($I = 0; $I -lt $WanderingWandererLocation; $I++) {
+                $WanderingOutputFiller += " "
+            }
+
+            $WanderingOutputString = $WanderingOutputFiller, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String
+            $WanderingOutputString
+        }
     } ElseIf ($Type -eq "RandomLaser") {
         $WanderingLaserLocation = 0
         $WanderingLaserDirection = "right"
@@ -228,7 +243,7 @@ Function Start-Wandering {
         $WanderingDiverLeft = "/"
         $WanderingDiverDown = "|"
         $WanderingDiverColor = "`e[91m"
-        $WanderingWanderer = "●"
+        # $WanderingWanderer = "●"
 
         [console]::TreatControlCAsInput = $True
         [console]::CursorVisible = $False
