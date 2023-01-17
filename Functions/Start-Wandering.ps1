@@ -151,7 +151,7 @@ Function Start-Wandering {
 
             $WanderingOutputFiller = ""
             For ($I = 0; $I -lt $WanderingWandererLocation; $I++) {
-                $WanderingOutputFiller += " "
+                $WanderingOutputFiller = $WanderingOutputFiller, " " | Join-String
             }
 
             $WanderingOutputString = $WanderingOutputFiller, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String

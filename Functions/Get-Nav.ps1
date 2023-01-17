@@ -22,7 +22,8 @@ Function Get-Nav {
     
     $NavUserCharacter = "●"
     $NavMountedDrivesArray = (Get-PSDrive -psprovider filesystem).name
-    
+
+    $NavHash = [ordered]@{}
     Function BuildLocationHash {
         param (
             [Parameter()][String]$Path
@@ -33,18 +34,17 @@ Function Get-Nav {
         } Else {
             $NavLocationItems = Get-ChildItem $Path -Force
         }
-        $NavHash = [ordered]@{}
+        $NavHash.clear()
         For ($NavI = 0; $NavI -lt $NavLocationItems.count; $NavI++) {
-            $NavHash.add($NavI,$NavLocationItems[$NavI])
+            $Null = $NavHash.add($NavI,$NavLocationItems[$NavI])
         }
-        Return $NavHash
     }
 
     # Getting content size.
     $NavHeaderPlusLocationRowCount = 6
     $NavHeader = (Prompt).tostring() + "`n"
     $NavFooterRowCount = 5
-    $NavFooter = "↑↓ Navigate list   ← Back to parent folder   → Enter selected folder`nSPACE End the function at the current location   ENTER Open the selected file or folder`n/ Pipe selected filepath and exit   Enter drive letter to change volume`n"
+    $NavFooter = "↑↓ Navigate list   ← Back to parent folder   → Enter selected folder`nSPACE ends the function at the current location   ENTER opens the selected file or folder`n/ pipes selected filepath and exit   Enter drive letter to change volume`n"
     $NavContentTopRow = $NavHeaderPlusLocationRowCount
     $NavContentMaxBottomRow = ((Get-Host).ui.rawui.windowsize.height) - $NavFooterRowCount - 2
     If (($NavContentMaxBottomRow - $NavContentTopRow) -lt 3) {
@@ -74,10 +74,11 @@ Function Get-Nav {
         }
     }
 
+    $NavOutputHash = [ordered]@{}
     Function BuildOutput {
         #Hashtable of objects with properties of Item, Type, and Selection, with the Selection having the user character if it's where the user has it.
 
-        $NavOutputHash = [ordered]@{}
+        $Null = $NavOutputHash.clear()
 
         If (($NavContentKeysHash["Top"] -gt 0) -and ($NavContentKeysHash["BottomMax"] -lt ($NavHash.count - 1))) {
             $NavSelectorColumnHeader = "↕"
@@ -111,7 +112,7 @@ Function Get-Nav {
                 Name = ($NavHash[$NavHashI]).name
             }
 
-            $NavOutputHash.add($NavHashI,(New-Object -typename psobject -property $NavHashObjectProperties))
+            $Null = $NavOutputHash.add($NavHashI,(New-Object -typename psobject -property $NavHashObjectProperties))
         }
 
         If ($NavOutputHash.count -gt 0) {
@@ -122,14 +123,15 @@ Function Get-Nav {
 
         $NavOutputArray = @($NavHeader, ("    Directory: " + $NavHashCurrentLocation + "   Item Count: " + $NavHash.count), $NavOutputContents, $NavFooter)
 
-        Clear-Host
+
+        $Null = Clear-Host
         $NavOutputArray
     }
     
     $NavUserLocation = 0
     $NavHashCurrentLocation = Get-Item (Get-Location)
-    $NavHash = BuildLocationHash -path $NavHashCurrentLocation
-    BuildKeyAnchors
+    $Null = BuildLocationHash -path $NavHashCurrentLocation
+    $Null = BuildKeyAnchors
     BuildOutput
 
     #Create while loop that does everything within the keypress logic.
@@ -144,7 +146,7 @@ Function Get-Nav {
                 #Everything that precedes the Return after a ctrl+c goes here.
                 [console]::TreatControlCAsInput = $False
                 [console]::CursorVisible = $True
-                Clear-Host
+                $Null = Clear-Host
                 Return
             } ElseIf (($Key.key -eq "DownArrow") -and ($NavUserLocation -lt ($NavHash.count - 1))) {
                 $NavUserLocation++
@@ -163,48 +165,48 @@ Function Get-Nav {
                 If ($Null -ne $NavHashCurrentLocation.parent) {
                     $NavUserLocation = 0
                     $NavHashCurrentLocation = $NavHashCurrentLocation.parent
-                    $NavHash = BuildLocationHash -path $NavHashCurrentLocation
-                    BuildKeyAnchors
+                    $Null = BuildLocationHash -path $NavHashCurrentLocation
+                    $Null = BuildKeyAnchors
                     BuildOutput
                 }
             } ElseIf ($Key.key -eq "RightArrow") {
                 # Go down a directory.
                 $NavHashResolvedSelection = $NavHash[($NavUserLocation)]
-                If (($NavHashResolvedSelection.mode -like "d*") -or ($NavHashResolvedSelection.mode -like "l*")) {
+                If ($NavHashResolvedSelection.attributes -like "*directory*") {
                     $NavUserLocation = 0
                     $NavHashCurrentLocation = Get-Item ($NavHashResolvedSelection.fullname)
-                    $NavHash = BuildLocationHash -path $NavHashCurrentLocation
-                    BuildKeyAnchors
+                    $Null = BuildLocationHash -path $NavHashCurrentLocation
+                    $Null = BuildKeyAnchors
                     BuildOutput
                 }
             } ElseIf ($Key.key -eq "Enter") {
                 #If a file, opens the file with the default program. If a directory, opens the directory in Explorer.
                 $NavHashResolvedSelection = $NavHash[($NavUserLocation)]
-                If ($NavHashResolvedSelection.mode -like "d*") {
-                    Start-Process $NavHashResolvedSelection
+                If ($NavHashResolvedSelection.attributes -like "*directory*") {
+                    $Null = Start-Process $NavHashResolvedSelection
                 } ElseIf ($Null -ne $NavHashResolvedSelection.fullname) {
-                    &($NavHashResolvedSelection.fullname)
+                    $Null = &($NavHashResolvedSelection.fullname)
                 }
             } ElseIf ($Key.key -eq "Space") {
                 # Do a cd into the current directory and end this function.
-                Set-Location $NavHashCurrentLocation
+                $Null = Set-Location $NavHashCurrentLocation
                 Return
             } ElseIf ($Key.key -eq "Oem2") {
                 # Pipe the selected item path into something.
-                Clear-Host
+                $Null = Clear-Host
                 $NavHashResolvedSelection = "'" + $NavHash[($NavUserLocation)] + "'"
                 "`n    $NavHashResolvedSelection`n"
                 $NavCommand = Read-Host "Enter command to pipe this item's path into"
                 $NavCommandString = $NavHashResolvedSelection, " | ", $NavCommand | Join-String
-                Invoke-Expression $NavCommandString
+                $Null = Invoke-Expression $NavCommandString
                 Return
             } ElseIf ($Key.key -in $NavMountedDrivesArray) {
                 # Change volumes. Only works for single-letter drives.
                 $NavDrive = $Key.key, ":" | Join-String
                 $NavUserLocation = 0
                 $NavHashCurrentLocation = $NavDrive
-                $NavHash = BuildLocationHash -path $NavHashCurrentLocation
-                BuildKeyAnchors
+                $Null = BuildLocationHash -path $NavHashCurrentLocation
+                $Null = BuildKeyAnchors
                 BuildOutput
             }
             
