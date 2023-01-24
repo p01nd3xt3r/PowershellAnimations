@@ -304,6 +304,72 @@ Function Start-Wandering {
             }
             $WanderingOutputString
         }
+    } ElseIf ($Type -eq "ThingIn") {
+        $ThingNewColor = 0
+        $Thing = ""
+        While ($True) {
+            If ($Thing.length -lt (10 + $ThingNewColor.tostring().length)) {
+                $ThingNewColor = Get-Random -minimum 0 -maximum 266
+                $Thing = "`e[38;5;$ThingNewColor`m"
+                For ($I = 0; $I -lt ($WanderingMaxWidth + 1); $I++) {
+                    $Thing = $Thing, "⬤" | Join-String
+                }
+            } Else {
+                $ThingRemovalStart = $Thing.length - 1
+                $Thing = $Thing.remove($ThingRemovalStart,1)
+            }
+            $Thing
+        }
+    } ElseIf ($Type -eq "ThingOut") {
+        $ThingNewColor = 0
+        $Thing = ""
+        While ($True) {
+            If ($Thing.length -lt ($WanderingMaxWidth + 1)) {
+                $Thing = $Thing.insert($Thing.length,"⬤")
+            } Else {
+                $ThingNewColor = Get-Random -minimum 0 -maximum 266
+                $Thing = "`e[38;5;$ThingNewColor`m⬤"
+            }
+            $Thing
+        }
+    } ElseIf ($Type -eq "ThingInOut") {
+        $ThingLeftColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
+        $ThingRightColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
+        $ThingLeft = ""
+        $ThingRight = ""
+        For ($I = 0; $I -lt $WanderingMaxWidth; $I++) {
+            $ThingRight = $ThingRight.insert($I,"⬤")
+        }
+        $ThingDirection = ">"
+        While ($True) {
+            # Whole line all the time. Only move the split.
+            # Maybe just maintain two sides, increasing or decreasing both of them each iteration.
+            # Insert all into an output string at the end. See if .insert or | join is faster.
+            If ($ThingDirection -eq ">") {
+                If ($ThingLeft.length -ne $WanderingMaxWidth) {
+                    $ThingLeft = $ThingLeft.insert(($ThingLeft.length),"⬤")
+                    $ThingRight = $ThingRight.remove(($ThingRight.length - 1),1)
+                } Else {
+                    $ThingDirection = "<"
+                    $ThingLeftColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
+                    $ThingRightColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
+                    $ThingLeft = $ThingLeft.remove(($ThingLeft.length - 1),1)
+                    $ThingRight = $ThingRight.insert($ThingRight.length,"⬤")
+                }
+            } Else {
+                If ($ThingLeft.length -ne 0) {
+                    $ThingLeft = $ThingLeft.remove(($ThingLeft.length - 1),1)
+                    $ThingRight = $ThingRight.insert($ThingRight.length,"⬤")
+                } Else {
+                    $ThingDirection = ">"
+                    $ThingLeftColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
+                    $ThingRightColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
+                    $ThingLeft = $ThingLeft.insert(($ThingLeft.length),"⬤")
+                    $ThingRight = $ThingRight.remove(($ThingRight.length - 1),1)
+                }
+            }
+            $ThingLeftColor, $ThingLeft, $ThingRightColor, $ThingRight | Join-String
+        }
     } Else {
         Write-Host "Sorry, you've entered an invalid type."
         Return
