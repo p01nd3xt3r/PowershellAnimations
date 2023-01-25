@@ -375,7 +375,3 @@ Function Start-Wandering {
         Return
     }
 }
-
-# What about something that changes based on user input?
-# What about navigating a file system like a gui labyrinth? What about navigating the Graph PowerShell module?
-

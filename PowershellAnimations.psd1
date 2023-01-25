@@ -72,7 +72,6 @@ Copyright = '(c) Patrick D. Pace. All rights reserved.'
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 NestedModules = @(
     '.\functions\Get-Fireworks.ps1',
-    '.\Functions\Start-Annoying.ps1',
     '.\Functions\Start-Fiesta.ps1',
     '.\Functions\Start-Labyrinth.ps1',
     '.\functions\Start-Pacing.ps1',
@@ -86,7 +85,6 @@ NestedModules = @(
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
     "Get-Fireworks",
-    "Start-Annoying",
     "Start-Fiesta",
     "Start-Labyrinth",
     "Start-Pacing",
