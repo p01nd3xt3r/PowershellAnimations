@@ -13,13 +13,34 @@
 #>
 Function Start-Wandering {
     param (
-        [Parameter()][String]$Type = "Laser"
+        [Parameter()][Int]$Type = 1,
+        [Parameter()][Switch]$ListTypes,
+        [Parameter()][Int]$Slow = 0
     )
+
+    $TypesHash = [ordered]@{
+        "Laser" = 1
+        "TwistLaser" = 2
+        "Random" = 3
+        "Confetti" = 4
+        "RandomLaser" = 5
+        "Background" = 6
+        "ThingIn" = 7
+        "ThingOut" = 8
+        "ThingInOut" = 9
+        "Waving" = 10
+        "Passing" = 11
+    }
+
+    If ($True -eq $ListTypes) {
+        $TypesHash
+        Return
+    }
 
     $WanderingMaxWidth = ((Get-Host).ui.rawui.windowsize.width) - 3
     $WanderingWandererColors = @(0..255)
 
-    If ($Type -eq "laser") {
+    If ($Type -eq 1) {
         $WanderingWandererLocation = 0
         $WanderingWandererDirection = "right"
         $WanderingWandererRight = "\"
@@ -55,8 +76,9 @@ Function Start-Wandering {
 
             $WanderingOutputString = $WanderingOutputFiller, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String
             $WanderingOutputString
+            Start-Sleep -Milliseconds $Slow
         }
-    } ElseIf ($Type -eq "twistlaser") {
+    } ElseIf ($Type -eq 2) {
         #Making it an even number of spaces to keep from having some weird center charater.
         If (($WanderingMaxWidth % 2) -gt 0) {
             $WanderingMaxWidth--
@@ -127,8 +149,9 @@ Function Start-Wandering {
             }
 
             $WanderingOutputString
+            Start-Sleep -Milliseconds $Slow
         }
-    } ElseIf ($Type -eq "Random") {
+    } ElseIf ($Type -eq 3) {
         $WanderingWanderer = "●"
         While ($True) {
             $WanderingWandererLocation = (0..$WanderingMaxWidth) | Get-Random
@@ -141,9 +164,9 @@ Function Start-Wandering {
 
             $WanderingOutputString = $WanderingOutputFiller, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String
             $WanderingOutputString
+            Start-Sleep -Milliseconds $Slow
         }
-
-    } ElseIf ($Type -eq "Confetti") {
+    } ElseIf ($Type -eq 4) {
         While ($True) {
             $WanderingWanderer = "□","■","▲","►","▼","◄","○","☻","☺","●" | Get-Random
             $WanderingWandererLocation = (0..$WanderingMaxWidth) | Get-Random
@@ -156,8 +179,9 @@ Function Start-Wandering {
 
             $WanderingOutputString = $WanderingOutputFiller, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m" | Join-String
             $WanderingOutputString
+            Start-Sleep -Milliseconds $Slow
         }
-    } ElseIf ($Type -eq "RandomLaser") {
+    } ElseIf ($Type -eq 5) {
         $WanderingLaserLocation = 0
         $WanderingLaserDirection = "right"
         $WanderingLaserRight = "\"
@@ -221,8 +245,9 @@ Function Start-Wandering {
             }
 
             $WanderingOutputString
+            Start-Sleep -Milliseconds $Slow
         }
-    } ElseIf ($Type -eq "Background") {
+    } ElseIf ($Type -eq 6) {
         $WanderingMaxWidth
         $WanderingWandererColors
         # Make it show a background color in all spots other than the target spot
@@ -303,8 +328,9 @@ Function Start-Wandering {
                 $WanderingOutputString = $WanderingOutputFillerLeft, "`e[38;5;", $WanderingWandererCurrentColor, "m", $WanderingWanderer, "`e[0m", $WanderingOutputFillerCenter, $WanderingDiverColor, $WanderingDiver, "`e[0m" | Join-String
             }
             $WanderingOutputString
+            Start-Sleep -Milliseconds $Slow
         }
-    } ElseIf ($Type -eq "ThingIn") {
+    } ElseIf ($Type -eq 7) {
         $ThingNewColor = 0
         $Thing = ""
         While ($True) {
@@ -319,8 +345,9 @@ Function Start-Wandering {
                 $Thing = $Thing.remove($ThingRemovalStart,1)
             }
             $Thing
+            Start-Sleep -Milliseconds $Slow
         }
-    } ElseIf ($Type -eq "ThingOut") {
+    } ElseIf ($Type -eq 8) {
         $ThingNewColor = 0
         $Thing = ""
         While ($True) {
@@ -331,8 +358,9 @@ Function Start-Wandering {
                 $Thing = "`e[38;5;$ThingNewColor`m⬤"
             }
             $Thing
+            Start-Sleep -Milliseconds $Slow
         }
-    } ElseIf ($Type -eq "ThingInOut") {
+    } ElseIf ($Type -eq 9) {
         $ThingLeftColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
         $ThingRightColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) + "m"
         $ThingLeft = ""
@@ -369,6 +397,85 @@ Function Start-Wandering {
                 }
             }
             $ThingLeftColor, $ThingLeft, $ThingRightColor, $ThingRight | Join-String
+            Start-Sleep -Milliseconds $Slow
+        }
+    } ElseIf ($Type -eq 10) {
+        If (($WanderingMaxWidth % 2) -gt 0) {
+            $WanderingMaxWidth--
+        }
+        $WipingLeftString = ""
+        $WipingRightString = ""
+        For ($I = 0; $I -lt (($WanderingMaxWidth/3)*2); $I++) {
+            $WipingRightString = $WipingRightString, " " | Join-String
+        }
+        $WipingCharacter = "⬤"
+        $WipingWiper = ""
+        For ($I = 0; $I -lt ($WanderingMaxWidth/3); $I++) {
+            $WipingWiper = $WipingWiper,$WipingCharacter | Join-String
+        }
+        $WipingWiperColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) +"`m"
+        $WipingColoredWiper = $WipingWiperColor, $WipingWiper, "`e[0m" | Join-String
+        $WipingDirection = ">"
+
+        While ($True) {
+            If ($WipingDirection -eq ">") {
+                If ($WipingRightString.length -gt 0) {
+                    $WipingRightString = $WipingRightString.remove(($WipingRightString.length - 1), 1)
+                    $WipingLeftString = $WipingLeftString.insert(0, " ")
+                } Else {
+                    $WipingDirection = "<"
+                    $WipingRightString = $WipingRightString.insert(0, " ")
+                    $WipingLeftString = $WipingLeftString.remove(($WipingLeftString.length - 1), 1)
+                    $WipingWiperColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) +"`m"
+                    $WipingColoredWiper = $WipingWiperColor, $WipingWiper, "`e[0m" | Join-String
+                }
+            } Else {
+                If ($WipingLeftString.length -gt 0) {
+                    $WipingRightString = $WipingRightString.insert(0, " ")
+                    $WipingLeftString = $WipingLeftString.remove(($WipingLeftString.length - 1), 1)
+                } Else {
+                    $WipingDirection = ">"
+                    $WipingRightString = $WipingRightString.remove(($WipingRightString.length - 1), 1)
+                    $WipingLeftString = $WipingLeftString.insert(0, " ")
+                    $WipingWiperColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) +"`m"
+                    $WipingColoredWiper = $WipingWiperColor, $WipingWiper, "`e[0m" | Join-String
+                }
+            }
+            
+            $WipingLeftString, $WipingColoredWiper, $WipingRightString | Join-String
+            Start-Sleep -Milliseconds $Slow
+        }
+    } ElseIf ($Type -eq 11) {
+        If (($WanderingMaxWidth % 2) -gt 0) {
+            $WanderingMaxWidth--
+        }
+        $WipingLeftString = ""
+        $WipingRightString = ""
+        For ($I = 0; $I -lt (($WanderingMaxWidth/3)*2); $I++) {
+            $WipingRightStartingString = $WipingRightStartingString, " " | Join-String
+        }
+        $WipingRightString = $WipingRightStartingString
+        $WipingCharacter = "⬤"
+        $WipingWiper = ""
+        For ($I = 0; $I -lt ($WanderingMaxWidth/3); $I++) {
+            $WipingWiper = $WipingWiper,$WipingCharacter | Join-String
+        }
+        $WipingWiperColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) +"`m"
+        $WipingColoredWiper = $WipingWiperColor, $WipingWiper, "`e[0m" | Join-String
+
+        While ($True) {
+                If ($WipingRightString.length -gt 0) {
+                    $WipingRightString = $WipingRightString.remove(($WipingRightString.length - 1), 1)
+                    $WipingLeftString = $WipingLeftString.insert(0, " ")
+                } Else {
+                    $WipingLeftString = ""
+                    $WipingRightString = $WipingRightStartingString
+                    $WipingWiperColor = "`e[38;5;" + (Get-Random -minimum 0 -maximum 266) +"`m"
+                    $WipingColoredWiper = $WipingWiperColor, $WipingWiper, "`e[0m" | Join-String
+                }
+            
+            $WipingLeftString, $WipingColoredWiper, $WipingRightString | Join-String
+            Start-Sleep -Milliseconds $Slow
         }
     } Else {
         Write-Host "Sorry, you've entered an invalid type."
